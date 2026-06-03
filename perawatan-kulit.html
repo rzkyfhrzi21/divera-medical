@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="asset/css/style.css">
 </head>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
+      <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top" style="background-color: #FAFAFA;">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold" href="index.html">
         <img src="asset/img/logo.png" alt="Logo" height="40" class="me-2"> DiVera Medical
@@ -20,19 +20,27 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a class="nav-link" href="index.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="homecare.html">Homecare</a></li>
-          <li class="nav-item"><a class="nav-link" href="kesehatan.html">Kesehatan</a></li>
-          <li class="nav-item"><a class="nav-link active" href="perawatan-kulit.html">Perawatan Kulit</a></li>
-          <li class="nav-item"><a class="nav-link" href="obat-vitamin.html">Obat & Vitamin</a></li>
-          <li class="nav-item"><a class="nav-link" href="kalender-kehamilan.html">Kehamilan</a></li>
-          <li class="nav-item"><a class="nav-link" href="tanya-dokter.html">Tanya Dokter</a></li>
-          <li class="nav-item"><a class="nav-link" href="program-diet.html">Weight Loss</a></li>
-          <li class="nav-item ms-3">
-            <button class="btn btn-outline-secondary btn-sm rounded-circle" id="themeToggle" title="Toggle Dark Mode">🌓</button>
-          </li>
+        <ul class="navbar-nav mx-auto align-items-center gap-lg-4 gap-2 py-3 py-lg-0">
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="index.html">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="homecare.html">Homecare</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tanya-dokter.html">Konsultasi</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="obat-vitamin.html">Beli Obat</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kesehatan.html">Artikel</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kalender-kehamilan.html">Kehamilan</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tentang.html">Tentang</a></li>
         </ul>
+        <div class="dropdown mt-2 mt-lg-0">
+          <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm" data-bs-toggle="dropdown" style="cursor: pointer;">
+            <img src="asset/img/icon-female.png" alt="Profile" class="rounded-circle me-2" style="width: 25px; height: 25px; object-fit: cover; border: 1px solid #EBE6E9;">
+            <span class="fw-bold text-dark" style="font-size: 13px;">Tata Difa</span>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
+            <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-muted"></i> Profile</a></li>
+            <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-gear me-2 text-muted"></i> Setting</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item py-2 text-danger fw-bold" href="login.html"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </nav>
@@ -93,23 +101,60 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="mt-5 mb-3 text-center border-top pt-4">
-    <p class="text-muted small" style="color: #606672 !important">
-      © 2026 DiVera Medical. All rights reserved.<br class="d-block d-md-none" />
-      Solusi layanan kesehatan modern untuk konsultasi, pemeriksaan, dan perawatan terbaik.
-    </p>
+      <!-- Footer -->
+  <footer class="pt-5 pb-4 mt-5" style="background-color: #FFF0F5;">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6">
+          <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold mb-3" href="index.html">
+            <img src="asset/img/logo.png" alt="Logo" height="40" class="me-2"> DiVera Medical
+          </a>
+          <p class="text-muted small">Kesehatan Anda adalah prioritas kami.</p>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">BANTUAN & PANDUAN</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Pusat Bantuan</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Syarat & Ketentuan</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Kebijakan Privasi</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">LAYANAN</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="tanya-dokter.html" class="text-muted text-decoration-none small">Konsultasi Online</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Atur Jadwal</a></li>
+            <li class="mb-2"><a href="obat-vitamin.html" class="text-muted text-decoration-none small">Beli Obat</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Riwayat Periksa</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">KLINIK</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="tentang.html" class="text-muted text-decoration-none small">Tentang Kami</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Dokter Kami</a></li>
+            <li class="mb-2"><a href="homecare.html" class="text-muted text-decoration-none small">Homecare</a></li>
+            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Kontak Klinik</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-5">
+        <p class="text-muted small mb-0">© 2026 DiVera Medical. Semua hak dilindungi.</p>
+      </div>
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-bs-theme', newTheme);
-      themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
-    });
+    if(themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-bs-theme', newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
+      });
+    }
   </script>
 </body>
 </html>
