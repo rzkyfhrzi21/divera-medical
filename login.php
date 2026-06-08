@@ -1,3 +1,30 @@
+<?php 
+session_start(); 
+
+// Redirect otomatis jika sudah login
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['user_role'] === 'dokter') {
+        header("Location: dashboard/dokter/");
+        exit;
+    } else if ($_SESSION['user_role'] === 'pasien') {
+        header("Location: dashboard/pasien/");
+        exit;
+    }
+}
+?>
+// Ambil flash message dari session (jika ada), lalu hapus agar tidak muncul lagi saat refresh
+$flash = null;
+if (isset($_SESSION['flash'])) {
+    $flash = $_SESSION['flash'];
+    unset($_SESSION['flash']);
+}
+// Ambil redirect URL untuk login success
+$redirect_url = null;
+if (isset($_SESSION['redirect_url'])) {
+    $redirect_url = $_SESSION['redirect_url'];
+    unset($_SESSION['redirect_url']);
+}
+?>
 <!doctype html>
 <html lang="id" data-bs-theme="light">
   <head>
@@ -10,7 +37,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="asset/css/globals.css" />
-    <!-- Styles moved to globals.css -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body>
     <div class="container-fluid p-0 login-container">
@@ -55,7 +82,7 @@
         <!-- Right Side -->
         <div class="col-lg-6 login-right">
           <div class="position-absolute top-0 end-0 p-4 d-flex align-items-center gap-2">
-            <a href="index.html" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold"><i class="fa-solid fa-arrow-left me-1"></i> Beranda</a>
+            <a href="index" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold"><i class="fa-solid fa-arrow-left me-1"></i> Beranda</a>
             <button
               class="btn btn-outline-secondary btn-sm rounded-circle"
               id="themeToggle"
@@ -68,15 +95,17 @@
             <h2 class="fw-bold mb-1" style="color: #111626">Selamat Datang</h2>
             <p class="text-muted mb-4">Login sebagai dokter DiVera Medical</p>
 
-            <form action="index.html" method="get">
+            <form action="config/function_auth.php" method="post">
               <div class="mb-3">
                 <label class="form-label fw-bold" style="color: #111626"
-                  >NIK Dokter</label
+                  >Email</label
                 >
                 <input
-                  type="text"
+                  type="email"
+                  name="email"
+                  required
                   class="form-control form-control-lg bg-light border-0"
-                  placeholder="Masukkan nik"
+                  placeholder="Masukkan email"
                   style="
                     border-radius: 14px;
                     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
@@ -89,6 +118,8 @@
                 >
                 <input
                   type="password"
+                  name="password"
+                  required
                   class="form-control form-control-lg bg-light border-0"
                   placeholder="***"
                   style="
@@ -108,13 +139,14 @@
 
               <button
                 type="submit"
+                name="btn_login"
                 class="btn btn-primary-custom w-100 btn-lg mb-3 fw-bold"
                 style="border-radius: 12px"
               >
                 Masuk Dashboard
               </button>
               <a
-                href="register.html"
+                href="register"
                 class="btn btn-outline-primary w-100 btn-lg fw-bold d-block"
                 style="
                   border-color: var(--primary-color);
@@ -155,6 +187,36 @@
           }
         });
       });
+
+      <?php if ($flash && $flash['status'] === 'login_success'): ?>
+      Swal.fire({
+          icon: 'success',
+          title: '<?= htmlspecialchars($flash['message']) ?>',
+          text: 'Anda akan dialihkan ke Dashboard.',
+          showCancelButton: false,
+          confirmButtonColor: '#E91E63',
+          confirmButtonText: 'Ke Dashboard',
+          allowOutsideClick: false
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.location.href = '<?= $redirect_url ?? "index" ?>';
+          }
+      });
+      <?php elseif ($flash && $flash['status'] === 'error'): ?>
+      Swal.fire({
+          icon: 'error',
+          title: 'Gagal',
+          text: '<?= htmlspecialchars($flash['message']) ?>',
+          confirmButtonColor: '#E91E63'
+      });
+      <?php elseif ($flash && $flash['status'] === 'success'): ?>
+      Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: '<?= htmlspecialchars($flash['message']) ?>',
+          confirmButtonColor: '#E91E63'
+      });
+      <?php endif; ?>
     </script>
   </body>
 </html>

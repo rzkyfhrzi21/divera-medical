@@ -1,3 +1,19 @@
+<?php
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+$is_logged_in = isset($_SESSION['user_id']);
+$user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
+$initial = strtoupper(substr($user_nama, 0, 1));
+$dashboard_url = 'login';
+if ($is_logged_in) {
+    if ($_SESSION['user_role'] == 'admin') {
+        $dashboard_url = 'dashboard/admin-dashboard.php';
+    } else if ($_SESSION['user_role'] == 'dokter') {
+        $dashboard_url = 'dashboard/dokter/';
+    } else {
+        $dashboard_url = 'index';
+    }
+}
+?>
 <!doctype html>
 <html lang="id" data-bs-theme="light">
   <head>
@@ -16,7 +32,7 @@
         <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top" style="background-color: #FAFAFA;">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold" href="index.html">
+      <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold" href="index">
         <img src="asset/img/logo.png" alt="Logo" height="40" class="me-2"> DiVera Medical
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -24,26 +40,34 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mx-auto align-items-center gap-lg-4 gap-2 py-3 py-lg-0">
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="index.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="homecare.html">Homecare</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tanya-dokter.html">Konsultasi</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="obat-vitamin.html">Beli Obat</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kesehatan.html">Artikel</a></li>
-          <li class="nav-item"><a class="nav-link text-primary-custom fw-bold" style="font-size: 13px;" href="kalender-kehamilan.html">Kehamilan</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tentang.html">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="index">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="homecare">Homecare</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tanya-dokter">Konsultasi</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="obat-vitamin">Beli Obat</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kesehatan">Artikel</a></li>
+          <li class="nav-item"><a class="nav-link text-primary-custom fw-bold" style="font-size: 13px;" href="kalender-kehamilan">Kehamilan</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tentang">Tentang</a></li>
         </ul>
+        <?php if ($is_logged_in): ?>
         <div class="dropdown mt-2 mt-lg-0">
           <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm" data-bs-toggle="dropdown" style="cursor: pointer;">
-            <img src="asset/img/icon-female.png" alt="Profile" class="rounded-circle me-2" style="width: 25px; height: 25px; object-fit: cover; border: 1px solid #EBE6E9;">
-            <span class="fw-bold text-dark" style="font-size: 13px;">Tata Difa</span>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;"><?= $initial ?></div>
+            <span class="fw-bold text-dark" style="font-size: 13px;"><?= htmlspecialchars($user_nama) ?></span>
           </div>
           <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
             <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-muted"></i> Profile</a></li>
             <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-gear me-2 text-muted"></i> Setting</a></li>
+            <li><a class="dropdown-item py-2" href="<?= $dashboard_url ?>"><i class="fa-solid fa-chart-line me-2 text-muted"></i> Dashboard</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item py-2 text-danger fw-bold" href="login.html"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+            <li><a class="dropdown-item py-2 text-danger fw-bold" href="config/function_auth.php?action=logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
           </ul>
         </div>
+<?php else: ?>
+        <a href="login.php" class="text-decoration-none d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm mt-2 mt-lg-0">
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;">L</div>
+            <span class="fw-bold text-dark" style="font-size: 13px;">Login</span>
+        </a>
+<?php endif; ?>
       </div>
     </div>
   </nav>
@@ -128,7 +152,7 @@
     <div class="container">
       <div class="row gy-4">
         <div class="col-lg-4 col-md-6">
-          <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold mb-3" href="index.html">
+          <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold mb-3" href="index">
             <img src="asset/img/logo.png" alt="Logo" height="40" class="me-2"> DiVera Medical
           </a>
           <p class="text-muted small">Kesehatan Anda adalah prioritas kami.</p>
@@ -144,18 +168,18 @@
         <div class="col-lg-3 col-md-6">
           <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">LAYANAN</h6>
           <ul class="list-unstyled">
-            <li class="mb-2"><a href="tanya-dokter.html" class="text-muted text-decoration-none small">Konsultasi Online</a></li>
+            <li class="mb-2"><a href="tanya-dokter" class="text-muted text-decoration-none small">Konsultasi Online</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Atur Jadwal</a></li>
-            <li class="mb-2"><a href="obat-vitamin.html" class="text-muted text-decoration-none small">Beli Obat</a></li>
+            <li class="mb-2"><a href="obat-vitamin" class="text-muted text-decoration-none small">Beli Obat</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Riwayat Periksa</a></li>
           </ul>
         </div>
         <div class="col-lg-3 col-md-6">
           <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">KLINIK</h6>
           <ul class="list-unstyled">
-            <li class="mb-2"><a href="tentang.html" class="text-muted text-decoration-none small">Tentang Kami</a></li>
+            <li class="mb-2"><a href="tentang" class="text-muted text-decoration-none small">Tentang Kami</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Dokter Kami</a></li>
-            <li class="mb-2"><a href="homecare.html" class="text-muted text-decoration-none small">Homecare</a></li>
+            <li class="mb-2"><a href="homecare" class="text-muted text-decoration-none small">Homecare</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Kontak Klinik</a></li>
           </ul>
         </div>
@@ -179,3 +203,4 @@
     </script>
   </body>
 </html>
+

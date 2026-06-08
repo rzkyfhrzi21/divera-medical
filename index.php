@@ -1,3 +1,19 @@
+<?php
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+$is_logged_in = isset($_SESSION['user_id']);
+$user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
+$initial = strtoupper(substr($user_nama, 0, 1));
+$dashboard_url = 'login';
+if ($is_logged_in) {
+    if ($_SESSION['user_role'] == 'admin') {
+        $dashboard_url = 'dashboard/admin-dashboard.php';
+    } else if ($_SESSION['user_role'] == 'dokter') {
+        $dashboard_url = 'dashboard/dokter/';
+    } else {
+        $dashboard_url = 'index';
+    }
+}
+?>
 <!doctype html>
 <html lang="id" data-bs-theme="light">
   <head>
@@ -33,42 +49,42 @@
       </div>
 
       <nav class="d-flex flex-column gap-1">
-        <a href="index.html" class="nav-item-custom active">
+        <a href="index" class="nav-item-custom active">
           <i
             class="fa-solid fa-house-chimney"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Beranda</span>
         </a>
-        <a href="homecare.html" class="nav-item-custom">
+        <a href="homecare" class="nav-item-custom">
           <i
             class="fa-solid fa-hand-holding-medical"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Homecare</span>
         </a>
-        <a href="tentang.html" class="nav-item-custom">
+        <a href="tentang" class="nav-item-custom">
           <i
             class="fa-regular fa-building"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Tentang Kami</span>
         </a>
-        <a href="kesehatan.html" class="nav-item-custom">
+        <a href="kesehatan" class="nav-item-custom">
           <i
             class="fa-solid fa-notes-medical"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Kesehatan</span>
         </a>
-        <a href="kalender-kehamilan.html" class="nav-item-custom">
+        <a href="kalender-kehamilan" class="nav-item-custom">
           <i
             class="fa-solid fa-calendar-days"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Kalender Kehamilan</span>
         </a>
-        <a href="login.html" class="nav-item-custom">
+        <a href="login" class="nav-item-custom">
           <i
             class="fa-solid fa-gear"
             style="width: 16px; text-align: center"
@@ -77,7 +93,7 @@
         </a>
         <!-- Add Links to Other Figma Pages for easy access -->
         <a
-          href="tanya-dokter.html"
+          href="tanya-dokter"
           class="nav-item-custom mt-3 border-top pt-3"
         >
           <i
@@ -86,21 +102,21 @@
           ></i>
           <span class="nav-text ms-2">Tanya Dokter</span>
         </a>
-        <a href="perawatan-kulit.html" class="nav-item-custom">
+        <a href="perawatan-kulit" class="nav-item-custom">
           <i
             class="fa-solid fa-spa"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Perawatan Kulit</span>
         </a>
-        <a href="obat-vitamin.html" class="nav-item-custom">
+        <a href="obat-vitamin" class="nav-item-custom">
           <i
             class="fa-solid fa-capsules"
             style="width: 16px; text-align: center"
           ></i>
           <span class="nav-text ms-2">Obat & Vitamin</span>
         </a>
-        <a href="program-diet.html" class="nav-item-custom">
+        <a href="program-diet" class="nav-item-custom">
           <i
             class="fa-solid fa-apple-whole"
             style="width: 16px; text-align: center"
@@ -256,30 +272,28 @@
               </li>
             </ul>
           </div>
+          <?php if ($is_logged_in): ?>
           <div class="dropdown">
             <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" style="cursor: pointer;">
-              <img
-                src="asset/img/icon-female.png"
-                alt="Profile"
-                class="rounded-circle border"
-                width="40"
-                height="40"
-                style="object-fit: cover; border-color: #EBE6E9 !important;"
-              />
+              <img src="asset/img/icon-female.png" alt="Profile" class="rounded-circle border" width="40" height="40" style="object-fit: cover; border-color: #EBE6E9 !important;" />
               <div class="d-none d-md-block">
-                <div class="fw-bold text-dark" style="font-size: 14px">
-                  Tata Difa Ananda
-                </div>
-                <div class="text-muted" style="font-size: 12px">Dokter</div>
+                <div class="fw-bold text-dark" style="font-size: 14px"><?= htmlspecialchars($user_nama) ?></div>
+                <div class="text-muted text-capitalize" style="font-size: 12px"><?= htmlspecialchars($_SESSION["user_role"] ?? "Pasien") ?></div>
               </div>
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
               <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-muted"></i> Profile</a></li>
               <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-gear me-2 text-muted"></i> Setting</a></li>
+              <li><a class="dropdown-item py-2" href="<?= $dashboard_url ?>"><i class="fa-solid fa-chart-line me-2 text-muted"></i> Dashboard</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item py-2 text-danger fw-bold" href="login.html"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+              <li><a class="dropdown-item py-2 text-danger fw-bold" href="config/function_auth.php?action=logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
             </ul>
           </div>
+<?php else: ?>
+          <div>
+            <a href="login.php" class="btn btn-primary-custom fw-bold rounded-pill px-4">Login</a>
+          </div>
+<?php endif; ?>
         </div>
       </header>
 
@@ -415,7 +429,7 @@
                     </p>
                   </div>
                   <a
-                    href="tanya-dokter.html"
+                    href="tanya-dokter"
                     class="text-decoration-none text-muted"
                     ><i class="fa-solid fa-arrow-right"></i
                   ></a>
@@ -538,7 +552,7 @@
                 </div>
                 <i class="fa-solid fa-chevron-right small"></i>
               </a>
-              <a href="tanya-dokter.html" class="profile-menu-link">
+              <a href="tanya-dokter" class="profile-menu-link">
                 <div class="d-flex align-items-center">
                   <div
                     class="menu-icon"
@@ -562,7 +576,7 @@
                 </div>
                 <i class="fa-solid fa-chevron-right small"></i>
               </a>
-              <a href="kalender-kehamilan.html" class="profile-menu-link">
+              <a href="kalender-kehamilan" class="profile-menu-link">
                 <div class="d-flex align-items-center">
                   <div
                     class="menu-icon"
@@ -603,7 +617,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="fw-bold text-dark mb-0">Artikel Kesehatan</h5>
               <a
-                href="kesehatan.html"
+                href="kesehatan"
                 class="text-primary-custom text-decoration-none small fw-bold"
                 >Lihat Semua &rarr;</a
               >
@@ -745,7 +759,7 @@
     <div class="container">
       <div class="row gy-4">
         <div class="col-lg-4 col-md-6">
-          <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold mb-3" href="index.html">
+          <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold mb-3" href="index">
             <img src="asset/img/logo.png" alt="Logo" height="40" class="me-2"> DiVera Medical
           </a>
           <p class="text-muted small">Kesehatan Anda adalah prioritas kami.</p>
@@ -761,18 +775,18 @@
         <div class="col-lg-3 col-md-6">
           <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">LAYANAN</h6>
           <ul class="list-unstyled">
-            <li class="mb-2"><a href="tanya-dokter.html" class="text-muted text-decoration-none small">Konsultasi Online</a></li>
+            <li class="mb-2"><a href="tanya-dokter" class="text-muted text-decoration-none small">Konsultasi Online</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Atur Jadwal</a></li>
-            <li class="mb-2"><a href="obat-vitamin.html" class="text-muted text-decoration-none small">Beli Obat</a></li>
+            <li class="mb-2"><a href="obat-vitamin" class="text-muted text-decoration-none small">Beli Obat</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Riwayat Periksa</a></li>
           </ul>
         </div>
         <div class="col-lg-3 col-md-6">
           <h6 class="fw-bold text-primary-custom mb-3" style="font-size: 13px;">KLINIK</h6>
           <ul class="list-unstyled">
-            <li class="mb-2"><a href="tentang.html" class="text-muted text-decoration-none small">Tentang Kami</a></li>
+            <li class="mb-2"><a href="tentang" class="text-muted text-decoration-none small">Tentang Kami</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Dokter Kami</a></li>
-            <li class="mb-2"><a href="homecare.html" class="text-muted text-decoration-none small">Homecare</a></li>
+            <li class="mb-2"><a href="homecare" class="text-muted text-decoration-none small">Homecare</a></li>
             <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Kontak Klinik</a></li>
           </ul>
         </div>
@@ -837,15 +851,15 @@
       const searchResults = document.getElementById("searchResults");
 
       const pages = [
-        { title: "Beranda / Dashboard", url: "index.html", icon: "fa-house-chimney", category: "Menu Utama" },
-        { title: "Layanan Homecare", url: "homecare.html", icon: "fa-hand-holding-medical", category: "Layanan" },
-        { title: "Artikel Kesehatan", url: "kesehatan.html", icon: "fa-newspaper", category: "Informasi" },
-        { title: "Perawatan Kulit & Estetika", url: "perawatan-kulit.html", icon: "fa-spa", category: "Layanan Khusus" },
-        { title: "Obat & Vitamin", url: "obat-vitamin.html", icon: "fa-capsules", category: "Farmasi" },
-        { title: "Kalender Kehamilan", url: "kalender-kehamilan.html", icon: "fa-heart-pulse", category: "Data Kesehatan" },
-        { title: "Tanya Dokter", url: "tanya-dokter.html", icon: "fa-user-doctor", category: "Konsultasi" },
-        { title: "Program Diet / Weight Loss", url: "program-diet.html", icon: "fa-apple-whole", category: "Layanan Khusus" },
-        { title: "Pengaturan Akun", url: "login.html", icon: "fa-gear", category: "Sistem" }
+        { title: "Beranda / Dashboard", url: "index.php", icon: "fa-house-chimney", category: "Menu Utama" },
+        { title: "Layanan Homecare", url: "homecare.php", icon: "fa-hand-holding-medical", category: "Layanan" },
+        { title: "Artikel Kesehatan", url: "kesehatan.php", icon: "fa-newspaper", category: "Informasi" },
+        { title: "Perawatan Kulit & Estetika", url: "perawatan-kulit.php", icon: "fa-spa", category: "Layanan Khusus" },
+        { title: "Obat & Vitamin", url: "obat-vitamin.php", icon: "fa-capsules", category: "Farmasi" },
+        { title: "Kalender Kehamilan", url: "kalender-kehamilan.php", icon: "fa-heart-pulse", category: "Data Kesehatan" },
+        { title: "Tanya Dokter", url: "tanya-dokter.php", icon: "fa-user-doctor", category: "Konsultasi" },
+        { title: "Program Diet / Weight Loss", url: "program-diet.php", icon: "fa-apple-whole", category: "Layanan Khusus" },
+        { title: "Pengaturan Akun", url: "login.php", icon: "fa-gear", category: "Sistem" }
       ];
 
       searchInput.addEventListener("input", function() {
@@ -899,3 +913,4 @@
     </script>
   </body>
 </html>
+

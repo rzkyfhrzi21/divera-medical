@@ -1,3 +1,19 @@
+<?php
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+$is_logged_in = isset($_SESSION['user_id']);
+$user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
+$initial = strtoupper(substr($user_nama, 0, 1));
+$dashboard_url = 'login';
+if ($is_logged_in) {
+    if ($_SESSION['user_role'] == 'admin') {
+        $dashboard_url = 'dashboard/admin-dashboard.php';
+    } else if ($_SESSION['user_role'] == 'dokter') {
+        $dashboard_url = 'dashboard/dokter/';
+    } else {
+        $dashboard_url = 'index';
+    }
+}
+?>
 <!doctype html>
 <html lang="id">
   <head>
@@ -137,14 +153,14 @@
     <aside class="sidebar">
       <img src="asset/img/logo.png" alt="Logo" class="logo" />
       <nav class="nav-links">
-        <a href="index.html">Beranda</a>
-        <a href="homecare.html">Homecare</a>
-        <a href="kesehatan.html">Kesehatan</a>
-        <a href="perawatan-kulit.html">Perawatan Kulit</a>
-        <a href="obat-vitamin.html">Obat & Vitamin</a>
-        <a href="tanya-dokter.html">Tanya Dokter</a>
-        <a href="weight-loss.html" class="active">Weight Loss</a>
-        <a href="artikel-kalender-kehamilan.html">Artikel</a>
+        <a href="index">Beranda</a>
+        <a href="homecare">Homecare</a>
+        <a href="kesehatan">Kesehatan</a>
+        <a href="perawatan-kulit">Perawatan Kulit</a>
+        <a href="obat-vitamin">Obat & Vitamin</a>
+        <a href="tanya-dokter">Tanya Dokter</a>
+        <a href="weight-loss" class="active">Weight Loss</a>
+        <a href="artikel-kalender-kehamilan">Artikel</a>
       </nav>
     </aside>
     <main class="main-content">
@@ -229,3 +245,4 @@
     </main>
   </body>
 </html>
+

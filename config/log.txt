@@ -1,0 +1,38 @@
+## 2026-06-08
+
+### Setup Database & Authentication
+- Modified 'config/database.sql' - translasi nama tabel dan kolom menjadi Bahasa Indonesia
+- Modified 'login.php' - mengubah form POST dan integrasi SweetAlert2 redirect ke dashboard sesuai role
+- Modified 'register.php' - mengubah form POST dan integrasi SweetAlert2 redirect ke login
+- Created 'config/function_auth.php' - fungsi autentikasi (login, register, dan update profil) dengan redirect header
+
+### Fitur Produk & Janji Temu
+- Created 'config/function_product.php' - fungsi CRUD lengkap untuk mengelola produk
+- Created 'config/function_janji_temu.php' - fungsi CRUD lengkap untuk buat, perbarui status, dan hapus janji temu
+- Created 'keranjang.php' - template antarmuka keranjang belanja dan checkout
+
+### Admin Dashboard & URL Cleanup
+- Created 'dashboard/admin-dashboard.php' - template dashboard admin dengan desain menyerupai Shopee Seller Center
+- Created 'dashboard/admin-users.php' - template tabel CRUD untuk kelola daftar pengguna di dashboard
+- Modified '*.php' - mass-replace semua href .html menjadi clean URL untuk kompatibilitas .htaccess
+- Created 'agent.md' - instruksi AI agent guidelines dan dokumentasi log skill
+
+### Navbar Dinamis & Logout
+- Modified '*.php' - memperbarui navbar profile menjadi dinamis (menampilkan nama user & link ke dashboard jika login, atau tombol Login jika belum)
+- Modified '*.php' - memperbaiki logika navbar agar popup profil hanya muncul saat login, menambahkan handler logout
+
+### Refaktor Flash Session & Clean URL
+- Modified 'config/function_auth.php' - ganti semua notifikasi dari URL parameter ke $_SESSION flash message, hapus .php dari redirect
+- Modified 'config/function_product.php' - ganti notifikasi ke session flash, hapus .php, tambah komentar detail
+- Modified 'config/function_janji_temu.php' - ganti notifikasi ke session flash, hapus .php, tambah komentar detail
+- Modified 'login.php' - ambil notifikasi dari session flash (bukan $_GET), support login_success redirect
+- Modified 'register.php' - ambil notifikasi dari session flash, tambah tombol Login, ganti profil bar jadi tombol Login
+- Modified 'agent.md' - tambah aturan flash session, clean URL, dan catatan jangan ubah file existing
+
+### Dashboard Dokter & Pasien
+- Created 'dashboard/dokter/index.php' & 'dashboard/pasien/index.php' - refaktor menjadi layout utama dengan routing `switch($page)`
+- Created 'dashboard/*/*.php' - file konten beranda & janji temu berada satu folder dengan index (tanpa folder pages)
+- Terintegrasi DataTables dan BS5 Modal untuk kelola janji temu
+- Modified 'config/function_auth.php' - redirect login pasien ke dashboard/pasien/, dokter ke dashboard/dokter/
+- [TERBARU] Modified 'login.php' & 'register.php' - otomatis redirect ke dashboard jika sudah punya session aktif
+
