@@ -1,5 +1,6 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
+require_once 'config/koneksi.php';
 $is_logged_in = isset($_SESSION['user_id']);
 $user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
 $initial = strtoupper(substr($user_nama, 0, 1));
@@ -13,6 +14,20 @@ if ($is_logged_in) {
         $dashboard_url = 'index';
     }
 }
+
+$q_dokter = mysqli_query($koneksi, "
+    SELECT d.id, d.spesialisasi, d.biografi, d.tahun_pengalaman, d.biaya, p.nama, p.foto_profil
+    FROM dokter d
+    JOIN pengguna p ON d.id_pengguna = p.id
+    WHERE p.role = 'dokter'
+    ORDER BY p.nama ASC
+");
+$dokters = [];
+if ($q_dokter) {
+    while ($row = mysqli_fetch_assoc($q_dokter)) {
+        $dokters[] = $row;
+    }
+}
 ?>
 <!doctype html>
 <html lang="id" data-bs-theme="light">
@@ -24,6 +39,7 @@ if ($is_logged_in) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="asset/css/globals.css">
   <link rel="stylesheet" href="asset/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
       <!-- Navbar -->
@@ -45,10 +61,17 @@ if ($is_logged_in) {
           <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kalender-kehamilan">Kehamilan</a></li>
           <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tentang">Tentang</a></li>
         </ul>
+        <a href="<?= $is_logged_in ? 'keranjang' : 'login' ?>" class="text-dark position-relative me-3 mt-2 mt-lg-0" title="Keranjang">
+            <i class="fa-solid fa-cart-shopping fs-5"></i>
+        </a>
         <?php if ($is_logged_in): ?>
         <div class="dropdown mt-2 mt-lg-0">
           <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm" data-bs-toggle="dropdown" style="cursor: pointer;">
+            <?php if(isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto'])): ?>
+            <img src="asset/img/profil/<?= htmlspecialchars($_SESSION['user_foto']) ?>" class="rounded-circle me-2" style="width: 25px; height: 25px; object-fit: cover;" alt="Profile">
+            <?php else: ?>
             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;"><?= $initial ?></div>
+            <?php endif; ?>
             <span class="fw-bold text-dark" style="font-size: 13px;"><?= htmlspecialchars($user_nama) ?></span>
           </div>
           <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
@@ -87,47 +110,105 @@ if ($is_logged_in) {
 
     <h2 class="mb-4 text-center fw-bold">Dokter Pilihan Kami</h2>
     <div class="row g-4">
-      <!-- Doctor 1 -->
-      <div class="col-md-4">
-        <div class="card doctor-card h-100 p-3 text-center d-flex flex-column">
-          <img src="asset/img/icon-female.png" class="rounded-circle mx-auto mb-3" alt="Dr. Amanda" style="width: 100px; height: 100px; object-fit: cover;">
-          <h5 class="card-title fw-bold">dr. Amanda Putri, Sp.A</h5>
-          <p class="text-muted mb-1">Spesialis Anak</p>
-          <div class="d-flex justify-content-center text-warning mb-3">
-            ★★★★★ <span class="text-muted ms-2">(120 ulasan)</span>
+      <?php if (count($dokters) > 0): ?>
+        <?php foreach ($dokters as $dokter): ?>
+          <?php
+            $dokter_id = (int) $dokter['id'];
+            $nama_dokter = htmlspecialchars($dokter['nama']);
+            $spesialisasi = !empty($dokter['spesialisasi']) ? htmlspecialchars($dokter['spesialisasi']) : 'Dokter Umum';
+            $biaya = (float) ($dokter['biaya'] ?? 0);
+            $pengalaman = (int) ($dokter['tahun_pengalaman'] ?? 0);
+            $foto = !empty($dokter['foto_profil']) ? 'profil/' . $dokter['foto_profil'] : 'female-doctor.png';
+          ?>
+          <div class="col-md-4">
+            <div class="card doctor-card h-100 p-3 text-center d-flex flex-column shadow-sm border-0 rounded-4">
+              <img src="asset/img/<?= $foto ?>" class="rounded-circle mx-auto mb-3 object-fit-cover shadow-sm" alt="<?= $nama_dokter ?>" style="width: 100px; height: 100px;">
+              <h5 class="card-title fw-bold"><?= $nama_dokter ?></h5>
+              <p class="text-muted mb-1"><?= $spesialisasi ?></p>
+              <div class="d-flex justify-content-center text-warning mb-2">
+                ★★★★★ <span class="text-muted ms-2">(Baru)</span>
+              </div>
+              <p class="text-muted small mb-2"><?= $pengalaman > 0 ? $pengalaman . ' tahun pengalaman' : 'Pengalaman belum diatur' ?></p>
+              <p class="text-success fw-bold mt-auto mb-3">Rp <?= number_format($biaya, 0, ',', '.') ?></p>
+              <button
+                type="button"
+                class="btn btn-primary-custom w-100 rounded-pill"
+                data-bs-toggle="modal"
+                data-bs-target="#modalJanjiTemu<?= $dokter_id ?>">
+                Buat Janji Temu
+              </button>
+            </div>
           </div>
-          <p class="text-success fw-bold mt-auto mb-3">Rp 50.000</p>
-          <button class="btn btn-primary-custom w-100 rounded-pill">Chat Sekarang</button>
-        </div>
-      </div>
-      <!-- Doctor 2 -->
-      <div class="col-md-4">
-        <div class="card doctor-card h-100 p-3 text-center d-flex flex-column">
-          <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center text-white fs-1" style="width: 100px; height: 100px;">👨‍⚕️</div>
-          <h5 class="card-title fw-bold">dr. Budi Santoso, Sp.PD</h5>
-          <p class="text-muted mb-1">Penyakit Dalam</p>
-          <div class="d-flex justify-content-center text-warning mb-3">
-            ★★★★☆ <span class="text-muted ms-2">(85 ulasan)</span>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="col-12">
+          <div class="alert alert-light border text-center rounded-4 py-4">
+            <h5 class="fw-bold mb-1">Belum ada dokter tersedia</h5>
+            <p class="text-muted mb-0">Data dokter akan muncul setelah dokter melengkapi profilnya.</p>
           </div>
-          <p class="text-success fw-bold mt-auto mb-3">Rp 75.000</p>
-          <button class="btn btn-primary-custom w-100 rounded-pill">Chat Sekarang</button>
         </div>
-      </div>
-      <!-- Doctor 3 -->
-      <div class="col-md-4">
-        <div class="card doctor-card h-100 p-3 text-center d-flex flex-column">
-          <img src="asset/img/icon-female.png" class="rounded-circle mx-auto mb-3" alt="Dr. Citra" style="width: 100px; height: 100px; object-fit: cover;">
-          <h5 class="card-title fw-bold">dr. Citra Lestari, Sp.KK</h5>
-          <p class="text-muted mb-1">Kulit & Kelamin</p>
-          <div class="d-flex justify-content-center text-warning mb-3">
-            ★★★★★ <span class="text-muted ms-2">(200 ulasan)</span>
-          </div>
-          <p class="text-success fw-bold mt-auto mb-3">Rp 100.000</p>
-          <button class="btn btn-primary-custom w-100 rounded-pill">Chat Sekarang</button>
-        </div>
-      </div>
+      <?php endif; ?>
     </div>
   </main>
+
+  <?php foreach ($dokters as $dokter): ?>
+    <?php
+      $dokter_id = (int) $dokter['id'];
+      $nama_dokter = htmlspecialchars($dokter['nama']);
+      $spesialisasi = !empty($dokter['spesialisasi']) ? htmlspecialchars($dokter['spesialisasi']) : 'Dokter Umum';
+      $biografi = !empty($dokter['biografi']) ? htmlspecialchars($dokter['biografi']) : 'Dokter belum menambahkan biografi.';
+      $biaya = (float) ($dokter['biaya'] ?? 0);
+    ?>
+    <div class="modal fade" id="modalJanjiTemu<?= $dokter_id ?>" tabindex="-1" aria-labelledby="modalJanjiTemuLabel<?= $dokter_id ?>" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form action="config/function_janji_temu.php" method="POST" class="modal-content border-0 rounded-4 shadow">
+          <div class="modal-header border-0 pb-0">
+            <div>
+              <span class="badge rounded-pill text-bg-light text-primary-custom mb-2">Janji Temu Dokter</span>
+              <h5 class="modal-title fw-bold" id="modalJanjiTemuLabel<?= $dokter_id ?>"><?= $nama_dokter ?></h5>
+              <p class="text-muted small mb-0"><?= $spesialisasi ?></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="btn_add_janji_temu" value="1">
+            <input type="hidden" name="id_dokter" value="<?= $dokter_id ?>">
+
+            <div class="p-3 rounded-4 mb-4" style="background-color:#fff1f7;">
+              <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                <div>
+                  <div class="fw-bold text-dark">Biaya konsultasi</div>
+                  <div class="text-success fw-bold">Rp <?= number_format($biaya, 0, ',', '.') ?></div>
+                </div>
+                <div class="text-muted small"><?= nl2br($biografi) ?></div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Dokter</label>
+                <input type="text" class="form-control" value="<?= $nama_dokter ?> - <?= $spesialisasi ?>" readonly>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Tanggal & Waktu Janji</label>
+                <input type="datetime-local" name="tanggal_janji" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold">Gejala / Keluhan</label>
+                <textarea name="gejala" class="form-control" rows="4" placeholder="Ceritakan keluhan utama, durasi gejala, dan informasi penting lainnya..." required></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary-custom rounded-pill px-4">
+              Kirim Janji Temu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <?php endforeach; ?>
 
       <!-- Footer -->
   <footer class="pt-5 pb-4 mt-5" style="background-color: #FFF0F5;">
@@ -174,15 +255,14 @@ if ($is_logged_in) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const themeToggle = document.getElementById('themeToggle');
-    if(themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-bs-theme', newTheme);
-        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
-      });
-    }
+    <?php if (isset($_SESSION['flash'])): ?>
+    Swal.fire({
+        icon: '<?= $_SESSION['flash']['status'] === 'success' ? 'success' : 'error' ?>',
+        title: '<?= $_SESSION['flash']['status'] === 'success' ? 'Berhasil' : 'Gagal' ?>',
+        text: '<?= htmlspecialchars($_SESSION['flash']['message']) ?>',
+        confirmButtonColor: '#E91E63'
+    });
+    <?php unset($_SESSION['flash']); endif; ?>
   </script>
 </body>
 </html>

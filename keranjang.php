@@ -1,20 +1,56 @@
 <?php
-// keranjang.php
-?>
-<?php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
-$is_logged_in = isset($_SESSION['user_id']);
-$user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
+require_once 'config/koneksi.php';
+
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['flash'] = ['status' => 'error', 'message' => 'Anda harus login untuk mengakses keranjang.'];
+    header("Location: login");
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
+$is_logged_in = true;
+$user_nama = $_SESSION['user_nama'];
 $initial = strtoupper(substr($user_nama, 0, 1));
-$dashboard_url = 'login';
-if ($is_logged_in) {
-    if ($_SESSION['user_role'] == 'admin') {
-        $dashboard_url = 'dashboard/admin-dashboard.php';
-    } else if ($_SESSION['user_role'] == 'dokter') {
-        $dashboard_url = 'dashboard/dokter/';
-    } else {
-        $dashboard_url = 'index';
-    }
+$dashboard_url = 'dashboard/pasien/';
+if ($_SESSION['user_role'] == 'admin') {
+    $dashboard_url = 'dashboard/admin-dashboard.php';
+} else if ($_SESSION['user_role'] == 'dokter') {
+    $dashboard_url = 'dashboard/dokter/';
+}
+
+// Fetch keranjang items
+$q_cart = mysqli_query($koneksi, "
+    SELECT k.*, p.nama_produk, p.harga, p.url_gambar 
+    FROM keranjang k 
+    JOIN produk p ON k.id_produk = p.id 
+    WHERE k.id_pengguna = '$user_id'
+");
+$cart_items = [];
+$total_tagihan = 0;
+while($row = mysqli_fetch_assoc($q_cart)) {
+    $cart_items[] = $row;
+    $total_tagihan += ($row['harga'] * $row['kuantitas']);
+}
+$biaya_layanan = 2000;
+$total_pengiriman = 23000;
+if (count($cart_items) == 0) {
+    $total_pengiriman = 0;
+    $biaya_layanan = 0;
+}
+$grand_total = $total_tagihan + $total_pengiriman + $biaya_layanan;
+
+// Fetch 4 produk dengan stok paling sedikit untuk rekomendasi (Sering Dibeli Berbarengan)
+$q_rekomendasi = mysqli_query($koneksi, "
+    SELECT id, nama_produk, harga, url_gambar 
+    FROM produk 
+    WHERE stok > 0 
+    ORDER BY stok ASC 
+    LIMIT 4
+");
+$rekomendasi_items = [];
+while($row = mysqli_fetch_assoc($q_rekomendasi)) {
+    $rekomendasi_items[] = $row;
 }
 ?>
 <!DOCTYPE html>
@@ -109,11 +145,12 @@ if ($is_logged_in) {
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold" href="index">
-                <img src="asset/img/logo.png" alt="Logo" height="30" class="me-2"> DiVera Medical
+                <img src="asset/img/logo.png" alt="Logo" height="30" class="me-2">
             </a>
             <div class="ms-auto d-flex align-items-center">
             <a href="<?= $dashboard_url ?>" class="text-decoration-none d-flex align-items-center">
-                <img src="asset/img/icon-female.png" alt="Profile" class="rounded-circle border me-2" width="35" height="35" style="object-fit: cover;">
+                <?php $foto_profil = isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto']) ? 'asset/img/profil/' . $_SESSION['user_foto'] : 'asset/img/icon-female.png'; ?>
+                                <img src="<?= htmlspecialchars($foto_profil) ?>" alt="Profile" class="rounded-circle border me-2" width="35" height="35" style="object-fit: cover;">
                 <span class="fw-bold fs-6 text-dark"><?= htmlspecialchars($user_nama) ?></span>
             </a>
         </div>
@@ -122,12 +159,12 @@ if ($is_logged_in) {
 
     <!-- Step Indicator -->
     <div class="step-indicator">
-        <div class="step text-muted">
-            <div class="step-circle">1</div> Alamat
+        <div class="step active">
+            <div class="step-circle">1</div> Keranjang
         </div>
         <div class="step-line"></div>
-        <div class="step active">
-            <div class="step-circle">2</div> Keranjang
+        <div class="step text-muted">
+            <div class="step-circle">2</div> Alamat
         </div>
         <div class="step-line"></div>
         <div class="step text-muted">
@@ -141,40 +178,63 @@ if ($is_logged_in) {
             <!-- Keranjang Items -->
             <div class="col-lg-8">
                 <h5 class="fw-bold mb-3">Daftar Pesanan</h5>
-                
-                <div class="cart-card d-flex align-items-center">
-                    <img src="asset/img/female-doctor.png" alt="Product" width="80" height="80" class="rounded border me-3" style="object-fit: cover;">
-                    <div class="flex-grow-1">
-                        <h6 class="fw-bold mb-1">Neurobion Forte 10 Tablet</h6>
-                        <p class="text-muted small mb-0">Per Strip</p>
-                    </div>
-                    <div class="text-end">
-                        <div class="fw-bold mb-2">Rp 57.000</div>
-                        <div class="d-flex align-items-center justify-content-end gap-2">
-                            <i class="fa-regular fa-trash-can text-muted" style="cursor: pointer;"></i>
-                            <div class="qty-btn ms-2">-</div>
-                            <span class="fw-bold">1</span>
-                            <div class="qty-btn">+</div>
+                <?php if (count($cart_items) > 0): ?>
+                    <?php foreach ($cart_items as $item): ?>
+                    <div class="cart-card d-flex align-items-center mb-3">
+                        <img src="asset/img/<?= !empty($item['url_gambar']) && file_exists('asset/img/produk/'.$item['url_gambar']) ? 'produk/'.$item['url_gambar'] : '600x400.jpg' ?>" alt="<?= htmlspecialchars($item['nama_produk']) ?>" width="80" height="80" class="rounded border me-3" style="object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1"><?= htmlspecialchars($item['nama_produk']) ?></h6>
+                            <p class="text-muted small mb-0">Rp <?= number_format($item['harga'], 0, ',', '.') ?></p>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold mb-2">Rp <?= number_format($item['harga'] * $item['kuantitas'], 0, ',', '.') ?></div>
+                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                <form action="config/function_product.php" method="POST" class="d-inline">
+                                    <input type="hidden" name="id_keranjang" value="<?= $item['id'] ?>">
+                                    <button type="submit" name="btn_hapus_keranjang" class="btn btn-sm btn-link p-0 border-0 text-muted">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                </form>
+                                <form action="config/function_product.php" method="POST" class="d-inline">
+                                    <input type="hidden" name="id_keranjang" value="<?= $item['id'] ?>">
+                                    <input type="hidden" name="action" value="minus">
+                                    <button type="submit" name="btn_update_keranjang" class="qty-btn ms-2 border-0" style="width:25px;height:25px;">-</button>
+                                </form>
+                                <span class="fw-bold px-1"><?= $item['kuantitas'] ?></span>
+                                <form action="config/function_product.php" method="POST" class="d-inline">
+                                    <input type="hidden" name="id_keranjang" value="<?= $item['id'] ?>">
+                                    <input type="hidden" name="action" value="plus">
+                                    <button type="submit" name="btn_update_keranjang" class="qty-btn border-0" style="width:25px;height:25px;">+</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="alert alert-light text-center py-5 border">
+                        <i class="fa-solid fa-cart-arrow-down fa-3x text-muted mb-3"></i>
+                        <h6 class="fw-bold text-muted">Keranjang masih kosong</h6>
+                        <a href="obat-vitamin" class="btn btn-primary-custom btn-sm mt-2 rounded-pill px-4">Belanja Sekarang</a>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Sering Dibeli Berbarengan -->
+                <?php if(count($rekomendasi_items) > 0): ?>
                 <h6 class="fw-bold mt-4 mb-3">Sering Dibeli Berbarengan</h6>
                 <div class="d-flex gap-3 overflow-auto pb-3">
+                    <?php foreach($rekomendasi_items as $item): ?>
                     <div class="border rounded p-2 text-center" style="min-width: 140px; background: white;">
-                        <img src="asset/img/female-doctor.png" alt="Prod" width="60" height="60" class="mb-2">
-                        <div class="small fw-bold text-truncate" style="font-size: 11px;">Tolak Angin Cair</div>
-                        <div class="small text-muted mb-2" style="font-size: 11px;">Rp 63.700</div>
-                        <button class="btn btn-primary-custom btn-sm w-100 p-0" style="height: 25px;">+</button>
+                        <img src="<?= htmlspecialchars(!empty($item['url_gambar']) ? 'asset/img/produk/' . $item['url_gambar'] : 'asset/img/female-doctor.png') ?>" alt="<?= htmlspecialchars($item['nama_produk']) ?>" width="60" height="60" class="mb-2" style="object-fit: cover; border-radius: 8px;">
+                        <div class="small fw-bold text-truncate" style="font-size: 11px;" title="<?= htmlspecialchars($item['nama_produk']) ?>"><?= htmlspecialchars($item['nama_produk']) ?></div>
+                        <div class="small text-muted mb-2" style="font-size: 11px;">Rp <?= number_format($item['harga'], 0, ',', '.') ?></div>
+                        <form action="config/function_product.php" method="POST">
+                            <input type="hidden" name="id_produk" value="<?= $item['id'] ?>">
+                            <button type="submit" name="btn_add_keranjang" class="btn btn-primary-custom btn-sm w-100 p-0" style="height: 25px;">+</button>
+                        </form>
                     </div>
-                    <div class="border rounded p-2 text-center" style="min-width: 140px; background: white;">
-                        <img src="asset/img/female-doctor.png" alt="Prod" width="60" height="60" class="mb-2">
-                        <div class="small fw-bold text-truncate" style="font-size: 11px;">Betadine Mouthwash</div>
-                        <div class="small text-muted mb-2" style="font-size: 11px;">Rp 31.400</div>
-                        <button class="btn btn-primary-custom btn-sm w-100 p-0" style="height: 25px;">+</button>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Ringkasan Pembayaran -->
@@ -188,34 +248,24 @@ if ($is_logged_in) {
 
                     <h6 class="fw-bold mb-3">Ringkasan Pembayaran</h6>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Keranjang (1 Item)</span>
-                        <span>Rp 57.000</span>
+                        <span class="text-muted">Keranjang (<?= count($cart_items) ?> Item)</span>
+                        <span>Rp <?= number_format($total_tagihan, 0, ',', '.') ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Total Pengiriman</span>
-                        <span>Rp 23.000</span>
+                        <span>Rp <?= number_format($total_pengiriman, 0, ',', '.') ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 small">
                         <span class="text-muted">Biaya Layanan</span>
-                        <span>Rp 2.000</span>
+                        <span>Rp <?= number_format($biaya_layanan, 0, ',', '.') ?></span>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between mb-4">
                         <span class="fw-bold fs-5">Total Tagihan</span>
-                        <span class="fw-bold fs-5">Rp 82.000</span>
+                        <span class="fw-bold fs-5 text-primary-custom">Rp <?= number_format($grand_total, 0, ',', '.') ?></span>
                     </div>
 
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-bold">Alamat Pengiriman</span>
-                            <a href="#" class="text-primary-custom text-decoration-none small fw-bold">Ubah</a>
-                        </div>
-                        <div class="small fw-bold">Jalan Setia Budi Selatan</div>
-                        <p class="small text-muted mb-2">Jl. Setia Budi Selatan No.10, RT.10/RW.7, Kuningan, Karet...</p>
-                        <input type="text" class="form-control form-control-sm" placeholder="Catatan (Contoh: Rumah no. 6)">
-                    </div>
-
-                    <button class="btn btn-primary-custom w-100 py-2 fw-bold" onclick="window.location.href='keranjang-pembayaran.php'">Berikutnya</button>
+                    <button class="btn btn-primary-custom w-100 py-2 fw-bold <?= count($cart_items) == 0 ? 'disabled' : '' ?>" onclick="window.location.href='alamat.php'">Berikutnya</button>
                 </div>
             </div>
         </div>

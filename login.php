@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
         exit;
     }
 }
-?>
+
 // Ambil flash message dari session (jika ada), lalu hapus agar tidak muncul lagi saat refresh
 $flash = null;
 if (isset($_SESSION['flash'])) {
@@ -93,7 +93,7 @@ if (isset($_SESSION['redirect_url'])) {
           </div>
           <div class="login-card">
             <h2 class="fw-bold mb-1" style="color: #111626">Selamat Datang</h2>
-            <p class="text-muted mb-4">Login sebagai dokter DiVera Medical</p>
+            <p class="text-muted mb-4">Login DiVera Medical</p>
 
             <form action="config/function_auth.php" method="post">
               <div class="mb-3">
@@ -154,7 +154,7 @@ if (isset($_SESSION['redirect_url'])) {
                   border-radius: 12px;
                 "
               >
-                Daftar Akun Dokter
+                Daftar Akun Pasien
               </a>
             </form>
           </div>

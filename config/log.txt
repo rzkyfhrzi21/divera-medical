@@ -34,5 +34,13 @@
 - Created 'dashboard/*/*.php' - file konten beranda & janji temu berada satu folder dengan index (tanpa folder pages)
 - Terintegrasi DataTables dan BS5 Modal untuk kelola janji temu
 - Modified 'config/function_auth.php' - redirect login pasien ke dashboard/pasien/, dokter ke dashboard/dokter/
-- [TERBARU] Modified 'login.php' & 'register.php' - otomatis redirect ke dashboard jika sudah punya session aktif
+- Modified 'login.php' & 'register.php' - otomatis redirect ke dashboard jika sudah punya session aktif
 
+## 2026-06-09
+
+### Integrasi UI & Data
+- Modified 'bayar.php' - menghapus halocoins & DiVera Pay, menambahkan tab virtual account, update ukuran ikon, dan menambahkan form dummy untuk kartu kredit/debit
+- Modified 'index.php', 'alamat.php', 'keranjang.php', 'weight-loss.php', dan beberapa halaman depan lainnya - mengubah foto profil statis dan nama/email menjadi dinamis berdasarkan session
+- Deleted 'fix_profile.php', 'fix_profile2.php', 'patch_navbar_v2.php' - menghapus file temporary script penggantian navbar dan profile
+- Modified 'keranjang.php' - mengubah fitur Sering Dibeli Berbarengan menggunakan data dari database berdasarkan stok paling sedikit limit 4
+- [TERBARU] Modified 'halaman depan (*.php)' - menambahkan navigasi ikon keranjang pada navbar dan mengarahkan ke halaman login jika user belum terautentikasi

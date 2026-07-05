@@ -59,7 +59,7 @@ if (isset($_POST['btn_add_produk'])) {
     } else {
         setFlash('error', 'Gagal menambah produk!');
     }
-    header("Location: ../dashboard/admin-dashboard?page=Data Produk");
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../dashboard/dokter/index?page=Data Produk'));
     exit;
 }
 
@@ -104,7 +104,7 @@ if (isset($_POST['btn_edit_produk'])) {
     } else {
         setFlash('error', 'Gagal mengubah produk!');
     }
-    header("Location: ../dashboard/admin-dashboard?page=Data Produk");
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../dashboard/dokter/index?page=Data Produk'));
     exit;
 }
 
@@ -131,7 +131,79 @@ if (isset($_POST['btn_delete_produk'])) {
     } else {
         setFlash('error', 'Gagal menghapus produk!');
     }
-    header("Location: ../dashboard/admin-dashboard?page=Data Produk");
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../dashboard/dokter/index?page=Data Produk'));
+    exit;
+}
+
+/* ======================================================
+   TAMBAH KE KERANJANG
+   1. Cek login
+   2. Cek apakah produk sudah ada di keranjang
+   3. Jika ada, tambah kuantitas; Jika tidak, insert baru
+====================================================== */
+if (isset($_POST['btn_add_keranjang'])) {
+    if (!isset($_SESSION['user_id'])) {
+        setFlash('error', 'Silakan login terlebih dahulu untuk menambah produk ke keranjang.');
+        header("Location: ../login");
+        exit;
+    }
+
+    $id_pengguna = intval($_SESSION['user_id']);
+    $id_produk   = intval($_POST['id_produk']);
+
+    // Cek apakah produk sudah ada di keranjang user
+    $cek = mysqli_query($koneksi, "SELECT id, kuantitas FROM keranjang WHERE id_pengguna='$id_pengguna' AND id_produk='$id_produk'");
+    if (mysqli_num_rows($cek) > 0) {
+        $row = mysqli_fetch_assoc($cek);
+        $new_qty = $row['kuantitas'] + 1;
+        $id_keranjang = $row['id'];
+        mysqli_query($koneksi, "UPDATE keranjang SET kuantitas='$new_qty' WHERE id='$id_keranjang'");
+    } else {
+        mysqli_query($koneksi, "INSERT INTO keranjang (id_pengguna, id_produk, kuantitas) VALUES ('$id_pengguna', '$id_produk', 1)");
+    }
+
+    setFlash('success', 'Produk berhasil dimasukkan ke keranjang!');
+    // Redirect kembali ke halaman sebelumnya (atau obat-vitamin.php)
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../obat-vitamin'));
+    exit;
+}
+
+/* ======================================================
+   UPDATE / HAPUS DARI KERANJANG
+====================================================== */
+if (isset($_POST['btn_update_keranjang'])) {
+    if (isset($_SESSION['user_id'])) {
+        $id_keranjang = intval($_POST['id_keranjang']);
+        $action = $_POST['action']; // 'plus' atau 'minus'
+        
+        $cek = mysqli_query($koneksi, "SELECT kuantitas FROM keranjang WHERE id='$id_keranjang' AND id_pengguna='{$_SESSION['user_id']}'");
+        if (mysqli_num_rows($cek) > 0) {
+            $row = mysqli_fetch_assoc($cek);
+            $qty = $row['kuantitas'];
+            
+            if ($action == 'plus') {
+                $qty++;
+                mysqli_query($koneksi, "UPDATE keranjang SET kuantitas='$qty' WHERE id='$id_keranjang'");
+            } else if ($action == 'minus') {
+                if ($qty > 1) {
+                    $qty--;
+                    mysqli_query($koneksi, "UPDATE keranjang SET kuantitas='$qty' WHERE id='$id_keranjang'");
+                } else {
+                    mysqli_query($koneksi, "DELETE FROM keranjang WHERE id='$id_keranjang'");
+                }
+            }
+        }
+    }
+    header("Location: ../keranjang");
+    exit;
+}
+
+if (isset($_POST['btn_hapus_keranjang'])) {
+    if (isset($_SESSION['user_id'])) {
+        $id_keranjang = intval($_POST['id_keranjang']);
+        mysqli_query($koneksi, "DELETE FROM keranjang WHERE id='$id_keranjang' AND id_pengguna='{$_SESSION['user_id']}'");
+    }
+    header("Location: ../keranjang");
     exit;
 }
 ?>

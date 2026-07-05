@@ -171,8 +171,14 @@ if ($is_logged_in) {
           placeholder="Cari program diet..."
         />
         <div class="user-info">
-          <span>Tata Difa Ananda</span>
-          <img src="asset/img/icon-female.png" alt="User" />
+          <a href="<?= $is_logged_in ? 'keranjang' : 'login' ?>" class="text-dark position-relative me-3" title="Keranjang" style="text-decoration: none;">
+            <i class="fa-solid fa-cart-shopping fs-5" style="color: #606672;"></i>
+          </a>
+          <span><?= htmlspecialchars($is_logged_in ? $user_nama : 'Guest') ?></span>
+          <?php 
+            $foto_profil = isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto']) ? 'asset/img/profil/' . $_SESSION['user_foto'] : 'asset/img/icon-female.png';
+          ?>
+          <img src="<?= htmlspecialchars($foto_profil) ?>" alt="Profile" style="object-fit: cover;" />
         </div>
       </header>
       <section class="page-banner">

@@ -31,11 +31,18 @@ function setFlash($status, $message) {
    3. Insert data janji temu ke database
 ====================================================== */
 if (isset($_POST['btn_add_janji_temu'])) {
+    $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../tanya-dokter';
 
     // Pastikan user sudah login sebagai pasien
     if (!isset($_SESSION['user_id'])) {
         setFlash('error', 'Anda harus login terlebih dahulu.');
         header("Location: ../login");
+        exit;
+    }
+
+    if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'pasien') {
+        setFlash('error', 'Janji temu hanya dapat dibuat dari akun pasien.');
+        header("Location: " . $redirect_url);
         exit;
     }
 
@@ -57,8 +64,21 @@ if (isset($_POST['btn_add_janji_temu'])) {
 
     // Ambil data janji temu dari form
     $id_dokter     = intval($_POST['id_dokter']);
-    $tanggal_janji = mysqli_real_escape_string($koneksi, $_POST['tanggal_janji']);
-    $gejala        = mysqli_real_escape_string($koneksi, $_POST['gejala']);
+    $tanggal_janji = mysqli_real_escape_string($koneksi, $_POST['tanggal_janji'] ?? '');
+    $gejala        = mysqli_real_escape_string($koneksi, $_POST['gejala'] ?? '');
+
+    if ($id_dokter <= 0 || empty($tanggal_janji) || empty(trim($gejala))) {
+        setFlash('error', 'Dokter, tanggal janji, dan gejala wajib diisi.');
+        header("Location: " . $redirect_url);
+        exit;
+    }
+
+    $cek_dokter = mysqli_query($koneksi, "SELECT id FROM dokter WHERE id='$id_dokter'");
+    if (!$cek_dokter || mysqli_num_rows($cek_dokter) == 0) {
+        setFlash('error', 'Dokter yang dipilih tidak ditemukan.');
+        header("Location: " . $redirect_url);
+        exit;
+    }
 
     // Insert janji temu baru dengan status default 'menunggu'
     $insert = mysqli_query($koneksi, "
@@ -71,7 +91,7 @@ if (isset($_POST['btn_add_janji_temu'])) {
     } else {
         setFlash('error', 'Gagal membuat janji temu!');
     }
-    header("Location: ../tanya-dokter");
+    header("Location: " . $redirect_url);
     exit;
 }
 
@@ -100,7 +120,8 @@ if (isset($_POST['btn_update_janji_temu'])) {
         setFlash('error', 'Gagal memperbarui status!');
     }
     // Kembali ke dashboard halaman Janji Temu
-    header("Location: ../dashboard/admin-dashboard?page=Janji Temu");
+    $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index';
+    header("Location: " . $redirect_url);
     exit;
 }
 
@@ -121,7 +142,8 @@ if (isset($_POST['btn_delete_janji_temu'])) {
     } else {
         setFlash('error', 'Gagal menghapus janji temu!');
     }
-    header("Location: ../dashboard/admin-dashboard?page=Janji Temu");
+    $redirect_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index';
+    header("Location: " . $redirect_url);
     exit;
 }
 ?>

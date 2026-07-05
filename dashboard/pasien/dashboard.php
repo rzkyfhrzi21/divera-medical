@@ -78,17 +78,29 @@ if ($data_pasien) {
         </div>
     </div>
     <div class="col-md-3">
-        <div class="content-card h-100 text-center d-flex flex-column justify-content-center">
-            <div class="text-primary-custom mb-2"><i class="fa-solid fa-calendar-check fa-2x"></i></div>
-            <h3 class="fw-bold mb-0"><?= $total_janji ?></h3>
-            <p class="text-muted small mb-0">Total Janji Temu</p>
+        <div class="content-card h-100 d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-muted fw-bold mb-1" style="font-size: 12px;">Total Janji Temu</p>
+                <div class="d-flex align-items-end gap-2">
+                    <h3 class="fw-bold m-0" style="color: #111626;"><?= $total_janji ?></h3>
+                </div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; background-color: #e0f2fe; color: #0284c7; font-size: 18px;">
+                T
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="content-card h-100 text-center d-flex flex-column justify-content-center">
-            <div class="text-warning mb-2"><i class="fa-solid fa-hourglass-half fa-2x"></i></div>
-            <h3 class="fw-bold mb-0"><?= $total_menunggu ?></h3>
-            <p class="text-muted small mb-0">Menunggu</p>
+        <div class="content-card h-100 d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-muted fw-bold mb-1" style="font-size: 12px;">Menunggu</p>
+                <div class="d-flex align-items-end gap-2">
+                    <h3 class="fw-bold m-0" style="color: #111626;"><?= $total_menunggu ?></h3>
+                </div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; background-color: #fff3cd; color: #ffc107; font-size: 18px;">
+                M
+            </div>
         </div>
     </div>
 </div>
@@ -104,24 +116,24 @@ if ($data_pasien) {
 
     <?php if (count($janji_list) > 0): ?>
     <div class="table-responsive">
-        <table class="table table-hover align-middle" style="font-size: 13px;">
-            <thead class="table-light">
-                <tr>
-                    <th>Dokter</th>
-                    <th>Spesialisasi</th>
-                    <th>Tanggal</th>
-                    <th>Gejala</th>
-                    <th>Status</th>
+        <table class="table table-borderless align-middle" style="font-size: 13px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #f0f0f0;">
+                    <th class="text-muted fw-bold pb-3">Dokter</th>
+                    <th class="text-muted fw-bold pb-3">Spesialisasi</th>
+                    <th class="text-muted fw-bold pb-3">Tanggal</th>
+                    <th class="text-muted fw-bold pb-3">Gejala</th>
+                    <th class="text-muted fw-bold pb-3">Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($janji_list as $j): ?>
-                <tr>
-                    <td class="fw-bold"><?= htmlspecialchars($j['nama_dokter']) ?></td>
-                    <td class="text-muted"><?= htmlspecialchars($j['spesialisasi'] ?? '-') ?></td>
-                    <td><?= date('d M Y, H:i', strtotime($j['tanggal_janji'])) ?></td>
-                    <td class="text-truncate" style="max-width: 180px;"><?= htmlspecialchars($j['gejala'] ?? '-') ?></td>
-                    <td>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td class="fw-bold py-3"><?= htmlspecialchars($j['nama_dokter']) ?></td>
+                    <td class="py-3 text-muted"><?= htmlspecialchars($j['spesialisasi'] ?? '-') ?></td>
+                    <td class="py-3 text-muted"><?= date('d M Y, H:i', strtotime($j['tanggal_janji'])) ?></td>
+                    <td class="text-truncate py-3 text-muted" style="max-width: 180px;"><?= htmlspecialchars($j['gejala'] ?? '-') ?></td>
+                    <td class="py-3">
                         <?php
                         $badge = 'bg-secondary';
                         if ($j['status'] == 'menunggu') $badge = 'bg-warning text-dark';
@@ -129,7 +141,7 @@ if ($data_pasien) {
                         elseif ($j['status'] == 'selesai') $badge = 'bg-success';
                         elseif ($j['status'] == 'dibatalkan') $badge = 'bg-danger';
                         ?>
-                        <span class="badge badge-status <?= $badge ?>"><?= ucfirst($j['status']) ?></span>
+                        <span class="badge badge-status <?= $badge ?> rounded-pill px-3 py-2 fw-semibold" style="font-size: 11px;"><?= ucfirst($j['status']) ?></span>
                     </td>
                 </tr>
                 <?php endforeach; ?>

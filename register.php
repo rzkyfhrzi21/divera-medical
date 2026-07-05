@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id'])) {
         exit;
     }
 }
-?>
+
 // Ambil flash message dari session (jika ada), lalu hapus
 $flash = null;
 if (isset($_SESSION['flash'])) {
@@ -55,7 +55,7 @@ if (isset($_SESSION['flash'])) {
           <h4 class="m-0 fw-bold" style="color: #E91E63;">DiVera <br><span style="font-size: 14px; color: #4A1C2F;">Medical</span></h4>
         </a>
         <div class="mt-4">
-          <h1 class="fw-bold mb-4" style="color: #111626; font-size: 32px;">Daftar Akun Dokter</h1>
+          <h1 class="fw-bold mb-4" style="color: #111626; font-size: 32px;">Daftar Akun Pasien</h1>
           <p class="text-muted" style="font-size: 15px; line-height: 1.6; color: #606672 !important;">
             Buat akun untuk mengelola konsultasi online, jadwal periksa, riwayat pasien, dan layanan klinik DiVera Medical.
           </p>
@@ -88,7 +88,7 @@ if (isset($_SESSION['flash'])) {
           <div class="bg-white rounded-4 shadow-sm p-5 w-100" style="max-width: 550px; border: 1px solid #ebe6e9;">
             <h3 class="fw-bold text-dark mb-4">Buat Akun Baru</h3>
             <form action="config/function_auth.php" method="post">
-              <input type="hidden" name="role" value="dokter">
+              <input type="hidden" name="role" value="pasien">
               <div class="mb-3">
                 <label class="form-label fw-bold small text-dark">Nama Lengkap</label>
                 <input type="text" name="nama" required class="form-control form-control-lg" placeholder="Tata Difa Ananda" style="font-size: 14px; border-radius: 10px; border: 1px solid #ebe6e9;">

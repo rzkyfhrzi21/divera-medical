@@ -21,28 +21,28 @@ $q_janji = mysqli_query($koneksi, "
     </div>
 
     <div class="table-responsive">
-        <table id="tabelJanjiPasien" class="table table-bordered table-hover align-middle" style="font-size: 14px; width:100%">
-            <thead class="table-light">
-                <tr>
-                    <th width="5%">No</th>
-                    <th>Dokter</th>
-                    <th>Spesialisasi</th>
-                    <th>Tanggal & Waktu</th>
-                    <th>Keluhan</th>
-                    <th>Catatan Dokter</th>
-                    <th>Status</th>
+        <table id="tabelJanjiPasien" class="table table-borderless align-middle" style="font-size: 14px; width:100%">
+            <thead>
+                <tr style="border-bottom: 2px solid #f0f0f0;">
+                    <th width="5%" class="text-muted fw-bold pb-3">No</th>
+                    <th class="text-muted fw-bold pb-3">Dokter</th>
+                    <th class="text-muted fw-bold pb-3">Spesialisasi</th>
+                    <th class="text-muted fw-bold pb-3">Tanggal & Waktu</th>
+                    <th class="text-muted fw-bold pb-3">Keluhan</th>
+                    <th class="text-muted fw-bold pb-3">Catatan Dokter</th>
+                    <th class="text-muted fw-bold pb-3">Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php $no = 1; while ($row = mysqli_fetch_assoc($q_janji)): ?>
-                <tr>
-                    <td><?= $no++ ?></td>
-                    <td class="fw-bold"><?= htmlspecialchars($row['nama_dokter']) ?></td>
-                    <td><?= htmlspecialchars($row['spesialisasi']) ?></td>
-                    <td><?= date('d M Y, H:i', strtotime($row['tanggal_janji'])) ?></td>
-                    <td><?= htmlspecialchars($row['gejala'] ?? '-') ?></td>
-                    <td><?= htmlspecialchars($row['catatan'] ?? '-') ?></td>
-                    <td>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td class="py-3"><?= $no++ ?></td>
+                    <td class="fw-bold py-3"><?= htmlspecialchars($row['nama_dokter']) ?></td>
+                    <td class="py-3"><?= htmlspecialchars($row['spesialisasi']) ?></td>
+                    <td class="py-3"><?= date('d M Y, H:i', strtotime($row['tanggal_janji'])) ?></td>
+                    <td class="py-3"><?= htmlspecialchars($row['gejala'] ?? '-') ?></td>
+                    <td class="py-3"><?= htmlspecialchars($row['catatan'] ?? '-') ?></td>
+                    <td class="py-3">
                         <?php
                         $badge = 'bg-secondary';
                         if ($row['status'] == 'menunggu') $badge = 'bg-warning text-dark';
@@ -50,7 +50,7 @@ $q_janji = mysqli_query($koneksi, "
                         elseif ($row['status'] == 'selesai') $badge = 'bg-success';
                         elseif ($row['status'] == 'dibatalkan') $badge = 'bg-danger';
                         ?>
-                        <span class="badge <?= $badge ?>"><?= ucfirst($row['status']) ?></span>
+                        <span class="badge <?= $badge ?> rounded-pill px-3 py-2 fw-semibold" style="font-size: 11px;"><?= ucfirst($row['status']) ?></span>
                     </td>
                 </tr>
                 <?php endwhile; ?>

@@ -171,6 +171,9 @@ if ($is_logged_in) {
         </div>
 
         <div class="d-flex align-items-center gap-3 topbar-actions">
+          <a href="<?= $is_logged_in ? 'keranjang' : 'login' ?>" class="text-dark position-relative me-2" title="Keranjang">
+            <i class="fa-solid fa-cart-shopping fs-5"></i>
+          </a>
           <button
             class="btn btn-outline-secondary btn-sm rounded-circle"
             id="themeToggle"
@@ -275,7 +278,10 @@ if ($is_logged_in) {
           <?php if ($is_logged_in): ?>
           <div class="dropdown">
             <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" style="cursor: pointer;">
-              <img src="asset/img/icon-female.png" alt="Profile" class="rounded-circle border" width="40" height="40" style="object-fit: cover; border-color: #EBE6E9 !important;" />
+              <?php 
+                $foto_profil = isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto']) ? 'asset/img/profil/' . $_SESSION['user_foto'] : 'asset/img/icon-female.png';
+              ?>
+              <img src="<?= htmlspecialchars($foto_profil) ?>" alt="Profile" class="rounded-circle border" width="40" height="40" style="object-fit: cover; border-color: #EBE6E9 !important;" />
               <div class="d-none d-md-block">
                 <div class="fw-bold text-dark" style="font-size: 14px"><?= htmlspecialchars($user_nama) ?></div>
                 <div class="text-muted text-capitalize" style="font-size: 12px"><?= htmlspecialchars($_SESSION["user_role"] ?? "Pasien") ?></div>
@@ -507,8 +513,11 @@ if ($is_logged_in) {
           <!-- Profile Panel -->
           <div class="right-sidebar text-center pt-4">
             <div class="position-relative d-inline-block mb-3">
+              <?php 
+                $foto_profil = isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto']) ? 'asset/img/profil/' . $_SESSION['user_foto'] : 'asset/img/icon-female.png';
+              ?>
               <img
-                src="asset/img/icon-female.png"
+                src="<?= htmlspecialchars($foto_profil) ?>"
                 alt="Profile"
                 class="rounded-circle border border-3"
                 style="
@@ -529,9 +538,9 @@ if ($is_logged_in) {
               </div>
             </div>
 
-            <h5 class="fw-bold text-dark mb-1">Tata Difa Ananda</h5>
+            <h5 class="fw-bold text-dark mb-1"><?= htmlspecialchars($is_logged_in ? $user_nama : 'Guest') ?></h5>
             <p class="text-muted small mb-3">
-              tatadifaan.2411050073@mail.darmajaya.ac.id
+              <?= htmlspecialchars($is_logged_in && isset($_SESSION['user_email']) ? $_SESSION['user_email'] : 'guest@diveramedical.com') ?>
             </p>
             <a
               href="#"

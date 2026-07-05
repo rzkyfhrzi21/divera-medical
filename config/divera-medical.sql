@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 08, 2026 at 06:32 AM
+-- Generation Time: Jun 11, 2026 at 08:40 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,6 +37,13 @@ CREATE TABLE `dokter` (
   `biaya` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `dokter`
+--
+
+INSERT INTO `dokter` (`id`, `id_pengguna`, `spesialisasi`, `nomor_izin_praktik`, `biografi`, `tahun_pengalaman`, `biaya`) VALUES
+(1, 2, '', NULL, NULL, 0, 0.00);
+
 -- --------------------------------------------------------
 
 --
@@ -54,6 +61,36 @@ CREATE TABLE `janji_temu` (
   `dibuat_pada` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `janji_temu`
+--
+
+INSERT INTO `janji_temu` (`id`, `id_dokter`, `id_pasien`, `tanggal_janji`, `status`, `gejala`, `catatan`, `dibuat_pada`) VALUES
+(2, 1, 2, '2026-06-11 12:45:00', 'menunggu', '11111111111111111111', NULL, '2026-06-11 05:46:06');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `keranjang`
+--
+
+CREATE TABLE `keranjang` (
+  `id` int(11) NOT NULL,
+  `id_pengguna` int(11) NOT NULL,
+  `id_produk` int(11) NOT NULL,
+  `kuantitas` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `keranjang`
+--
+
+INSERT INTO `keranjang` (`id`, `id_pengguna`, `id_produk`, `kuantitas`, `created_at`) VALUES
+(4, 4, 2, 3, '2026-06-11 05:46:43'),
+(5, 4, 4, 1, '2026-06-11 05:47:43'),
+(6, 4, 1, 1, '2026-06-11 05:48:06');
+
 -- --------------------------------------------------------
 
 --
@@ -67,8 +104,17 @@ CREATE TABLE `pasien` (
   `jenis_kelamin` enum('laki-laki','perempuan','lainnya') DEFAULT NULL,
   `golongan_darah` varchar(5) DEFAULT NULL,
   `berat_badan` decimal(5,2) DEFAULT NULL,
-  `tinggi_badan` decimal(5,2) DEFAULT NULL
+  `tinggi_badan` decimal(5,2) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  `bpjs` enum('ya','tidak') DEFAULT 'tidak'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pasien`
+--
+
+INSERT INTO `pasien` (`id`, `id_pengguna`, `tanggal_lahir`, `jenis_kelamin`, `golongan_darah`, `berat_badan`, `tinggi_badan`, `alamat`, `bpjs`) VALUES
+(2, 4, NULL, NULL, NULL, NULL, NULL, NULL, 'tidak');
 
 -- --------------------------------------------------------
 
@@ -81,17 +127,19 @@ CREATE TABLE `pengguna` (
   `nama` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('dokter','pasien') NOT NULL DEFAULT 'pasien',
+  `role` enum('admin','dokter','pasien') NOT NULL DEFAULT 'pasien',
   `telpon` varchar(20) DEFAULT NULL,
-  `tgl_daftar` timestamp NOT NULL DEFAULT current_timestamp()
+  `tgl_daftar` timestamp NOT NULL DEFAULT current_timestamp(),
+  `foto_profil` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pengguna`
 --
 
-INSERT INTO `pengguna` (`id`, `nama`, `email`, `password`, `role`, `telpon`, `tgl_daftar`) VALUES
-(1, 'Administrator', 'admin@divera.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '081234567890', '2026-06-08 04:25:43');
+INSERT INTO `pengguna` (`id`, `nama`, `email`, `password`, `role`, `telpon`, `tgl_daftar`, `foto_profil`) VALUES
+(2, 'Tata Difa', 'tata@gmail.com', '$2y$10$VcREM9D9y/oldpKECMVy2eVIXCn4gUPhzJa0lUzInCC6gsBx7QMrS', 'dokter', '085173200421', '2026-06-08 07:07:45', '6a2688cbc39f7.png'),
+(4, 'Vera Novana', 'veranovana@gmail.com', '$2y$10$fS9sqVBi3hcjyawufR07ceaXKI4lebjBw8yvNUNaohyHreBqoa6ny', 'pasien', '0811111111', '2026-06-11 05:45:16', NULL);
 
 -- --------------------------------------------------------
 
@@ -111,6 +159,16 @@ CREATE TABLE `produk` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `produk`
+--
+
+INSERT INTO `produk` (`id`, `nama_produk`, `kategori`, `deskripsi`, `harga`, `stok`, `url_gambar`, `dibuat_pada`) VALUES
+(1, 'Vitamin C 1000mg', '', 'Suplemen Daya Tahan', 45000.00, 100, '600x400.jpg', '2026-06-08 08:54:33'),
+(2, 'Paracetamol 500mg', '', 'Pereda Demam', 15000.00, 100, '600x400.jpg', '2026-06-08 08:54:33'),
+(4, 'Masker Medis 3Ply', '', 'Alat Kesehatan', 25000.00, 100, '6a26852f09dec.png', '2026-06-08 08:54:33'),
+(5, 'Cup Sealer 1 Roll', '', '11111111', 45000.00, 0, '6a2688dc83fd1.png', '2026-06-08 09:03:05');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -128,6 +186,14 @@ ALTER TABLE `janji_temu`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_dokter` (`id_dokter`),
   ADD KEY `id_pasien` (`id_pasien`);
+
+--
+-- Indexes for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_pengguna` (`id_pengguna`),
+  ADD KEY `id_produk` (`id_produk`);
 
 --
 -- Indexes for table `pasien`
@@ -157,31 +223,37 @@ ALTER TABLE `produk`
 -- AUTO_INCREMENT for table `dokter`
 --
 ALTER TABLE `dokter`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `janji_temu`
 --
 ALTER TABLE `janji_temu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `pasien`
 --
 ALTER TABLE `pasien`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `pengguna`
 --
 ALTER TABLE `pengguna`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `produk`
 --
 ALTER TABLE `produk`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -199,6 +271,13 @@ ALTER TABLE `dokter`
 ALTER TABLE `janji_temu`
   ADD CONSTRAINT `janji_temu_ibfk_1` FOREIGN KEY (`id_dokter`) REFERENCES `dokter` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `janji_temu_ibfk_2` FOREIGN KEY (`id_pasien`) REFERENCES `pasien` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  ADD CONSTRAINT `keranjang_ibfk_1` FOREIGN KEY (`id_pengguna`) REFERENCES `pengguna` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `keranjang_ibfk_2` FOREIGN KEY (`id_produk`) REFERENCES `produk` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `pasien`

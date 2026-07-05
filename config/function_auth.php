@@ -20,7 +20,8 @@ require_once 'koneksi.php';
    Menyimpan status dan pesan ke session untuk
    ditampilkan oleh SweetAlert2 di halaman tujuan.
 ====================================================== */
-function setFlash($status, $message) {
+function setFlash($status, $message)
+{
     $_SESSION['flash'] = [
         'status'  => $status,
         'message' => $message
@@ -51,8 +52,8 @@ if (isset($_POST['btn_register'])) {
         exit;
     }
 
-    // Hash password menggunakan bcrypt
-    $password_hash = password_hash($password_raw, PASSWORD_DEFAULT);
+    // Tanpa hash password
+    $password_hash = $password_raw;
 
     // Cek apakah email sudah dipakai pengguna lain
     $cek = mysqli_query($koneksi, "SELECT * FROM pengguna WHERE email='$email'");
@@ -99,12 +100,15 @@ if (isset($_POST['btn_login'])) {
     if (mysqli_num_rows($cek) > 0) {
         $user = mysqli_fetch_assoc($cek);
 
-        // Verifikasi password yang di-hash
-        if (password_verify($password, $user['password'])) {
+        // Verifikasi password
+        if ($password == $user['password']) {
             // Set session login
             $_SESSION['user_id']   = $user['id'];
             $_SESSION['user_nama'] = $user['nama'];
             $_SESSION['user_role'] = $user['role'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_telpon'] = $user['telpon'];
+            $_SESSION['user_foto'] = $user['foto_profil'];
 
             // Tentukan URL dashboard sesuai role pengguna
             $url_dashboard = 'dashboard/pasien/'; // Default: pasien
@@ -138,9 +142,7 @@ if (isset($_POST['btn_login'])) {
    3. Validasi email agar tidak bentrok
    4. Update ke database
 ====================================================== */
-if (isset($_POST['btn_update_profil'])) {
-
-    // Cek apakah user sudah login
+if (isset($_POST['btn_update_profil_pengguna'])) {
     if (!isset($_SESSION['user_id'])) {
         header("Location: ../login");
         exit;
@@ -149,33 +151,105 @@ if (isset($_POST['btn_update_profil'])) {
     $id_pengguna = $_SESSION['user_id'];
     $nama    = mysqli_real_escape_string($koneksi, $_POST['nama']);
     $email   = mysqli_real_escape_string($koneksi, $_POST['email']);
-    $telepon = mysqli_real_escape_string($koneksi, $_POST['telepon']);
+    $telepon = mysqli_real_escape_string($koneksi, $_POST['telpon']);
+    $password_baru = $_POST['password'];
+    $foto_lama = isset($_POST['foto_lama']) ? $_POST['foto_lama'] : '';
+    $foto_baru = $foto_lama;
 
-    // Cek email bentrok dengan pengguna lain
+    // Handle upload foto profil
+    if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === 0) {
+        $ext = strtolower(pathinfo($_FILES['foto_profil']['name'], PATHINFO_EXTENSION));
+        if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+            $foto_baru = uniqid() . '.' . $ext;
+            move_uploaded_file($_FILES['foto_profil']['tmp_name'], '../asset/img/profil/' . $foto_baru);
+            if (!empty($foto_lama) && file_exists('../asset/img/profil/' . $foto_lama)) {
+                unlink('../asset/img/profil/' . $foto_lama);
+            }
+        }
+    }
+
     $cek = mysqli_query($koneksi, "SELECT id FROM pengguna WHERE email = '$email' AND id != '$id_pengguna'");
     if (mysqli_num_rows($cek) > 0) {
+        if ($foto_baru != $foto_lama && file_exists('../asset/img/profil/' . $foto_baru)) unlink('../asset/img/profil/' . $foto_baru);
         setFlash('error', 'Email sudah dipakai pengguna lain!');
-        header("Location: ../dashboard/admin-dashboard");
+        header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index'));
         exit;
     }
 
-    // Jalankan query update data profil
+    $sql = "UPDATE pengguna SET nama='$nama', email='$email', telpon='$telepon', foto_profil='$foto_baru'";
+    if (!empty($password_baru)) {
+        $sql .= ", password='$password_baru'";
+    }
+    $sql .= " WHERE id='$id_pengguna'";
+
+    if (mysqli_query($koneksi, $sql)) {
+        $_SESSION['user_nama'] = $nama;
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_telpon'] = $telepon;
+        $_SESSION['user_foto'] = $foto_baru;
+        setFlash('success', 'Profil akun berhasil diperbarui!');
+    } else {
+        setFlash('error', 'Gagal memperbarui profil akun.');
+    }
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index'));
+    exit;
+}
+
+if (isset($_POST['btn_update_profil_dokter'])) {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: ../login");
+        exit;
+    }
+
+    $id_pengguna = $_SESSION['user_id'];
+    $spesialisasi = mysqli_real_escape_string($koneksi, $_POST['spesialisasi']);
+    $tahun_pengalaman = intval($_POST['tahun_pengalaman']);
+    $biaya = floatval($_POST['biaya']);
+    $biografi = mysqli_real_escape_string($koneksi, $_POST['biografi']);
+
     $update = mysqli_query($koneksi, "
-        UPDATE pengguna SET
-        nama='$nama',
-        email='$email',
-        telpon='$telepon'
-        WHERE id='$id_pengguna'
+        UPDATE dokter SET 
+        spesialisasi='$spesialisasi',
+        tahun_pengalaman='$tahun_pengalaman',
+        biaya='$biaya',
+        biografi='$biografi'
+        WHERE id_pengguna='$id_pengguna'
     ");
 
-    if ($update) {
-        // Update session nama agar langsung terlihat di navbar
-        $_SESSION['user_nama'] = $nama;
-        setFlash('success', 'Profil berhasil diupdate!');
-    } else {
-        setFlash('error', 'Gagal mengupdate profil.');
+    if ($update) setFlash('success', 'Data profil dokter berhasil diperbarui!');
+    else setFlash('error', 'Gagal memperbarui data dokter.');
+
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index'));
+    exit;
+}
+
+if (isset($_POST['btn_update_profil_pasien'])) {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: ../login");
+        exit;
     }
-    header("Location: ../dashboard/admin-dashboard");
+
+    $id_pengguna = $_SESSION['user_id'];
+    $tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir']);
+    $jenis_kelamin = mysqli_real_escape_string($koneksi, $_POST['jenis_kelamin']);
+    $golongan_darah = mysqli_real_escape_string($koneksi, $_POST['golongan_darah']);
+    $tinggi_badan = floatval($_POST['tinggi_badan']);
+    $berat_badan = floatval($_POST['berat_badan']);
+
+    $update = mysqli_query($koneksi, "
+        UPDATE pasien SET 
+        tanggal_lahir='$tanggal_lahir',
+        jenis_kelamin='$jenis_kelamin',
+        golongan_darah='$golongan_darah',
+        tinggi_badan='$tinggi_badan',
+        berat_badan='$berat_badan'
+        WHERE id_pengguna='$id_pengguna'
+    ");
+
+    if ($update) setFlash('success', 'Rekam data pasien berhasil diperbarui!');
+    else setFlash('error', 'Gagal memperbarui rekam data pasien.');
+
+    header("Location: " . (isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../index'));
     exit;
 }
 
@@ -200,4 +274,3 @@ if (isset($_GET['action']) && $_GET['action'] == 'logout') {
     header("Location: ../login");
     exit;
 }
-?>

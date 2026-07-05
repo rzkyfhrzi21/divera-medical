@@ -46,24 +46,42 @@ if ($data_dokter) {
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #E91E63, #F06292);">
-            <p>Total Janji Temu</p>
-            <h3><?= $total_janji ?></h3>
-            <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="content-card d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-muted fw-bold mb-1" style="font-size: 12px;">Total Janji Temu</p>
+                <div class="d-flex align-items-end gap-2">
+                    <h3 class="fw-bold m-0" style="color: #111626;"><?= $total_janji ?></h3>
+                </div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; background-color: #fce4ec; color: #E91E63; font-size: 18px;">
+                J
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #FF9800, #FFB74D);">
-            <p>Menunggu Konfirmasi</p>
-            <h3><?= $total_menunggu ?></h3>
-            <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="content-card d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-muted fw-bold mb-1" style="font-size: 12px;">Menunggu Konfirmasi</p>
+                <div class="d-flex align-items-end gap-2">
+                    <h3 class="fw-bold m-0" style="color: #111626;"><?= $total_menunggu ?></h3>
+                </div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; background-color: #fff3cd; color: #ffc107; font-size: 18px;">
+                M
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50, #81C784);">
-            <p>Selesai</p>
-            <h3><?= $total_selesai ?></h3>
-            <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="content-card d-flex justify-content-between align-items-center">
+            <div>
+                <p class="text-muted fw-bold mb-1" style="font-size: 12px;">Selesai</p>
+                <div class="d-flex align-items-end gap-2">
+                    <h3 class="fw-bold m-0" style="color: #111626;"><?= $total_selesai ?></h3>
+                </div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; background-color: #d1e7dd; color: #198754; font-size: 18px;">
+                S
+            </div>
         </div>
     </div>
 </div>
@@ -77,23 +95,23 @@ if ($data_dokter) {
 
     <?php if (count($janji_list) > 0): ?>
     <div class="table-responsive">
-        <table class="table table-hover align-middle" style="font-size: 13px;">
-            <thead class="table-light">
-                <tr>
-                    <th>Pasien</th>
-                    <th>Tanggal</th>
-                    <th>Gejala</th>
-                    <th>Status</th>
-                    <th class="text-center">Aksi</th>
+        <table class="table table-borderless align-middle" style="font-size: 13px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #f0f0f0;">
+                    <th class="text-muted fw-bold pb-3">Pasien</th>
+                    <th class="text-muted fw-bold pb-3">Tanggal</th>
+                    <th class="text-muted fw-bold pb-3">Gejala</th>
+                    <th class="text-muted fw-bold pb-3">Status</th>
+                    <th class="text-center text-muted fw-bold pb-3">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($janji_list as $j): ?>
-                <tr>
-                    <td class="fw-bold"><?= htmlspecialchars($j['nama_pasien']) ?></td>
-                    <td><?= date('d M Y, H:i', strtotime($j['tanggal_janji'])) ?></td>
-                    <td class="text-truncate" style="max-width: 200px;"><?= htmlspecialchars($j['gejala'] ?? '-') ?></td>
-                    <td>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td class="fw-bold py-3"><?= htmlspecialchars($j['nama_pasien']) ?></td>
+                    <td class="py-3 text-muted"><?= date('d M Y, H:i', strtotime($j['tanggal_janji'])) ?></td>
+                    <td class="text-truncate py-3 text-muted" style="max-width: 200px;"><?= htmlspecialchars($j['gejala'] ?? '-') ?></td>
+                    <td class="py-3">
                         <?php
                         $badge = 'bg-secondary';
                         if ($j['status'] == 'menunggu') $badge = 'bg-warning text-dark';
@@ -101,10 +119,11 @@ if ($data_dokter) {
                         elseif ($j['status'] == 'selesai') $badge = 'bg-success';
                         elseif ($j['status'] == 'dibatalkan') $badge = 'bg-danger';
                         ?>
-                        <span class="badge badge-status <?= $badge ?>"><?= ucfirst($j['status']) ?></span>
+                        <span class="badge badge-status <?= $badge ?> rounded-pill px-3 py-2 fw-semibold" style="font-size: 11px;"><?= ucfirst($j['status']) ?></span>
                     </td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-outline-primary" title="Detail"><i class="fa-solid fa-eye"></i></button>
+                    <td class="text-center py-3">
+                        <button class="btn btn-sm btn-primary-custom px-3 rounded-pill fw-bold" title="Edit">Edit</button>
+                        <button class="btn btn-sm btn-danger px-3 rounded-pill fw-bold" title="Hapus">Hapus</button>
                     </td>
                 </tr>
                 <?php endforeach; ?>

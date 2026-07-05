@@ -1,5 +1,7 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
+require_once 'config/koneksi.php';
+
 $is_logged_in = isset($_SESSION['user_id']);
 $user_nama = $is_logged_in ? $_SESSION['user_nama'] : 'Login';
 $initial = strtoupper(substr($user_nama, 0, 1));
@@ -10,7 +12,7 @@ if ($is_logged_in) {
     } else if ($_SESSION['user_role'] == 'dokter') {
         $dashboard_url = 'dashboard/dokter/';
     } else {
-        $dashboard_url = 'index';
+        $dashboard_url = 'dashboard/pasien/';
     }
 }
 ?>
@@ -22,11 +24,13 @@ if ($is_logged_in) {
   <title>Obat & Vitamin - DiVera Medical</title>
   <link rel="icon" href="asset/img/logo.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="asset/css/globals.css">
   <link rel="stylesheet" href="asset/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-      <!-- Navbar -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light shadow-sm sticky-top" style="background-color: #FAFAFA;">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center text-primary-custom fw-bold" href="index">
@@ -45,26 +49,49 @@ if ($is_logged_in) {
           <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="kalender-kehamilan">Kehamilan</a></li>
           <li class="nav-item"><a class="nav-link text-dark" style="font-size: 13px;" href="tentang">Tentang</a></li>
         </ul>
-        <?php if ($is_logged_in): ?>
-        <div class="dropdown mt-2 mt-lg-0">
-          <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm" data-bs-toggle="dropdown" style="cursor: pointer;">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Cart Icon -->
+          <a href="<?= $is_logged_in ? 'keranjang' : 'login' ?>" class="text-dark position-relative text-decoration-none">
+            <i class="fa-solid fa-cart-shopping fs-5"></i>
+            <?php
+            $cart_count = 0;
+            if ($is_logged_in) {
+                $uid = $_SESSION['user_id'];
+                $q_cart = mysqli_query($koneksi, "SELECT SUM(kuantitas) as total FROM keranjang WHERE id_pengguna='$uid'");
+                $d_cart = mysqli_fetch_assoc($q_cart);
+                $cart_count = $d_cart['total'] ? $d_cart['total'] : 0;
+            }
+            ?>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary-custom" style="font-size: 9px;">
+              <?= $cart_count ?>
+            </span>
+          </a>
+          
+          <?php if ($is_logged_in): ?>
+          <div class="dropdown mt-2 mt-lg-0">
+            <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm" data-bs-toggle="dropdown" style="cursor: pointer;">
+              <?php if(isset($_SESSION['user_foto']) && !empty($_SESSION['user_foto'])): ?>
+            <img src="asset/img/profil/<?= htmlspecialchars($_SESSION['user_foto']) ?>" class="rounded-circle me-2" style="width: 25px; height: 25px; object-fit: cover;" alt="Profile">
+            <?php else: ?>
             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;"><?= $initial ?></div>
-            <span class="fw-bold text-dark" style="font-size: 13px;"><?= htmlspecialchars($user_nama) ?></span>
+            <?php endif; ?>
+              <span class="fw-bold text-dark" style="font-size: 13px;"><?= htmlspecialchars($user_nama) ?></span>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
+              <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-muted"></i> Profile</a></li>
+              <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-gear me-2 text-muted"></i> Setting</a></li>
+              <li><a class="dropdown-item py-2" href="<?= $dashboard_url ?>"><i class="fa-solid fa-chart-line me-2 text-muted"></i> Dashboard</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item py-2 text-danger fw-bold" href="config/function_auth.php?action=logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+            </ul>
           </div>
-          <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; font-size: 14px;">
-            <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-muted"></i> Profile</a></li>
-            <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-gear me-2 text-muted"></i> Setting</a></li>
-            <li><a class="dropdown-item py-2" href="<?= $dashboard_url ?>"><i class="fa-solid fa-chart-line me-2 text-muted"></i> Dashboard</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item py-2 text-danger fw-bold" href="config/function_auth.php?action=logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
-          </ul>
+          <?php else: ?>
+          <a href="login.php" class="text-decoration-none d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm mt-2 mt-lg-0">
+              <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;">L</div>
+              <span class="fw-bold text-dark" style="font-size: 13px;">Login</span>
+          </a>
+          <?php endif; ?>
         </div>
-<?php else: ?>
-        <a href="login.php" class="text-decoration-none d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm mt-2 mt-lg-0">
-            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 25px; height: 25px; background-color: #FFE6F0; color: #E91E63; font-size: 11px;">L</div>
-            <span class="fw-bold text-dark" style="font-size: 13px;">Login</span>
-        </a>
-<?php endif; ?>
       </div>
     </div>
   </nav>
@@ -94,50 +121,32 @@ if ($is_logged_in) {
 
     <h3 class="mb-4 fw-bold">Produk Populer</h3>
     <div class="row g-4">
-      <!-- Product 1 -->
+      <?php
+      $query_produk = mysqli_query($koneksi, "SELECT * FROM produk ORDER BY id ASC LIMIT 8");
+      while ($p = mysqli_fetch_assoc($query_produk)):
+      ?>
       <div class="col-md-3 col-sm-6">
         <div class="card product-card h-100 p-3 text-center border-0 shadow-sm">
-          <img src="asset/img/600x400.jpg" class="img-fluid rounded mb-3" alt="Vitamin C" style="height: 150px; object-fit: cover;">
-          <h6 class="card-title fw-bold text-dark">Vitamin C 1000mg</h6>
-          <p class="text-muted small mb-2">Suplemen Daya Tahan</p>
-          <p class="text-primary-custom fw-bold mb-3">Rp 45.000</p>
-          <button class="btn btn-outline-primary-custom w-100 rounded-pill">+ Keranjang</button>
+          <img src="asset/img/<?= !empty($p['url_gambar']) && file_exists('asset/img/produk/'.$p['url_gambar']) ? 'produk/'.$p['url_gambar'] : '600x400.jpg' ?>" class="img-fluid rounded mb-3" alt="<?= htmlspecialchars($p['nama_produk']) ?>" style="height: 150px; object-fit: cover;">
+          <h6 class="card-title fw-bold text-dark"><?= htmlspecialchars($p['nama_produk']) ?></h6>
+          <p class="text-muted small mb-2"><?= htmlspecialchars($p['kategori']) ?></p>
+          <p class="text-primary-custom fw-bold mb-3">Rp <?= number_format($p['harga'], 0, ',', '.') ?></p>
+          
+          <?php if ($p['stok'] > 0): ?>
+          <form action="config/function_product.php" method="POST">
+             <input type="hidden" name="id_produk" value="<?= $p['id'] ?>">
+             <button type="submit" name="btn_add_keranjang" class="btn btn-outline-primary-custom w-100 rounded-pill">+ Keranjang</button>
+          </form>
+          <?php else: ?>
+          <button class="btn btn-secondary w-100 rounded-pill disabled" style="opacity: 0.7;">Produk Habis</button>
+          <?php endif; ?>
         </div>
       </div>
-      <!-- Product 2 -->
-      <div class="col-md-3 col-sm-6">
-        <div class="card product-card h-100 p-3 text-center border-0 shadow-sm">
-          <img src="asset/img/600x400.jpg" class="img-fluid rounded mb-3" alt="Paracetamol" style="height: 150px; object-fit: cover;">
-          <h6 class="card-title fw-bold text-dark">Paracetamol 500mg</h6>
-          <p class="text-muted small mb-2">Pereda Demam</p>
-          <p class="text-primary-custom fw-bold mb-3">Rp 15.000</p>
-          <button class="btn btn-outline-primary-custom w-100 rounded-pill">+ Keranjang</button>
-        </div>
-      </div>
-      <!-- Product 3 -->
-      <div class="col-md-3 col-sm-6">
-        <div class="card product-card h-100 p-3 text-center border-0 shadow-sm">
-          <img src="asset/img/600x400.jpg" class="img-fluid rounded mb-3" alt="Madu Anak" style="height: 150px; object-fit: cover;">
-          <h6 class="card-title fw-bold text-dark">Madu Anak Plus</h6>
-          <p class="text-muted small mb-2">Kesehatan Anak</p>
-          <p class="text-primary-custom fw-bold mb-3">Rp 60.000</p>
-          <button class="btn btn-outline-primary-custom w-100 rounded-pill">+ Keranjang</button>
-        </div>
-      </div>
-      <!-- Product 4 -->
-      <div class="col-md-3 col-sm-6">
-        <div class="card product-card h-100 p-3 text-center border-0 shadow-sm">
-          <img src="asset/img/600x400.jpg" class="img-fluid rounded mb-3" alt="Masker Medis" style="height: 150px; object-fit: cover;">
-          <h6 class="card-title fw-bold text-dark">Masker Medis 3Ply</h6>
-          <p class="text-muted small mb-2">Alat Kesehatan</p>
-          <p class="text-primary-custom fw-bold mb-3">Rp 25.000</p>
-          <button class="btn btn-outline-primary-custom w-100 rounded-pill">+ Keranjang</button>
-        </div>
-      </div>
+      <?php endwhile; ?>
     </div>
   </main>
 
-      <!-- Footer -->
+  <!-- Footer -->
   <footer class="pt-5 pb-4 mt-5" style="background-color: #FFF0F5;">
     <div class="container">
       <div class="row gy-4">
@@ -191,8 +200,21 @@ if ($is_logged_in) {
         themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
       });
     }
+
+    <?php 
+    $flash = null;
+    if (isset($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+    }
+    if ($flash): ?>
+    Swal.fire({
+        icon: '<?= $flash['status'] === 'success' ? 'success' : 'error' ?>',
+        title: '<?= $flash['status'] === 'success' ? 'Berhasil' : 'Gagal' ?>',
+        text: '<?= htmlspecialchars($flash['message']) ?>',
+        confirmButtonColor: '#E91E63'
+    });
+    <?php endif; ?>
   </script>
 </body>
 </html>
-
-
